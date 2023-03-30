@@ -53,9 +53,15 @@ public class SettingSailScript : MonoBehaviour
         Swap
     };
 
+    void Awake() {
+        Module.OnActivate += delegate () { Audio.PlaySoundAtTransform("ss_activation", transform); }; 
+    }
+
     private void Start()
     {
         _moduleId = _moduleIdCounter++;
+
+
 
         for (int i = 0; i < 4; i++)
             Buttonage[i].OnInteract += ButtonagePrsesesed(i);
@@ -155,7 +161,7 @@ public class SettingSailScript : MonoBehaviour
             {
                 Module.HandlePass();
                 _moduleSolved = true;
-                Audio.PlaySoundAtTransform("ss_solve", transform);
+                Audio.PlaySoundAtTransform("ss_solveSound", transform);
                 Debug.LogFormat("[Setting Sail #{0}] Correctly pressed Boat #{1}. Module Solved!", _moduleId, i + 1);
             }
             else
@@ -278,4 +284,57 @@ public class SettingSailScript : MonoBehaviour
         }
         return k;
     }
+
+    private bool inputIsValid(string cmd)
+    {
+        string[] validstuff = { "1", "2", "3", "4" };
+        if (validstuff.Contains(cmd))
+        {
+            return true;
+        }
+        return false;
+    }
+
+
+#pragma warning disable 414
+    private readonly string TwitchHelpMessage = @"!{0} press <#> [Presses that button in reading order]";
+#pragma warning restore 414
+    IEnumerator ProcessTwitchCommand(string command)
+    {
+        string[] parameters = command.Split(' ');
+        if (Regex.IsMatch(parameters[0], @"^\s*press\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) || Regex.IsMatch(parameters[0], @"^\s*button\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant) || Regex.IsMatch(parameters[0], @"^\s*pos\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+        {
+            if (parameters.Length == 2)
+            {
+                if (inputIsValid(parameters[1]))
+                {
+                    yield return null;
+                    if (parameters[1].Equals("1"))
+                    {
+                        Buttonage[0].OnInteract();
+                    }
+                    else if (parameters[1].Equals("2"))
+                    {
+                        Buttonage[1].OnInteract();
+                    }
+                    else if (parameters[1].Equals("3"))
+                    {
+                        Buttonage[2].OnInteract();
+                    }
+                    else if (parameters[1].Equals("4"))
+                    {
+                        Buttonage[3].OnInteract();
+                    }
+                }
+            }
+            yield break;
+        }
+    }
+
+    IEnumerator TwitchHandleForcedSolve()
+    {
+        Buttonage[correctBoat].OnInteract();
+        yield return new WaitForSeconds(0.1f);
+    }
+
 }
