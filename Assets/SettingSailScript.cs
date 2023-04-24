@@ -24,6 +24,7 @@ public class SettingSailScript : MonoBehaviour
     private int _moduleId;
     private static int _moduleIdCounter = 1;
     private bool _moduleSolved;
+    private bool _moduleActivated;
 
     private static readonly string[] wateriswet = { "Atlantic Ocean", "Arctic Ocean", "Caribbean", "Pacific Ocean", "Southern Ocean", "Baltic Sea", "Indian Ocean", "Mediterranean", "Black Sea" };
     private static readonly string[] boats = { "Proa", "Catboat", "Lugger", "Snow", "Sloop", "Cutter", "Yawl", "Ketch", "Schooner", "Topsail Schooner", "Brig", "Schooner Brig", "Brigantine", "Barque", "Barquentine", "Polacre", "Fully Rigged Ship", "Junk", "Felucca", "Gunter", "Bilander" };
@@ -53,18 +54,23 @@ public class SettingSailScript : MonoBehaviour
         Swap
     };
 
-    void Awake() {
-        Module.OnActivate += delegate () { Audio.PlaySoundAtTransform("ss_activation", transform); }; 
-    }
-
     private void Start()
     {
         _moduleId = _moduleIdCounter++;
-
-
-
         for (int i = 0; i < 4; i++)
             Buttonage[i].OnInteract += ButtonagePrsesesed(i);
+        for (int i = 0; i < 4; i++)
+        {
+            DisplayOutlineSprites[i].sprite = null;
+            DisplayBoatSprites[i].sprite = null;
+            Display.text = "";
+        }
+        Module.OnActivate += ActivateAndCalculate;
+    }
+
+    private void ActivateAndCalculate()
+    {
+        Audio.PlaySoundAtTransform("ss_activation", transform);
 
         chosenDisplayWord = Rnd.Range(0, 9);
         Display.text = wateriswet[chosenDisplayWord];
@@ -136,6 +142,7 @@ public class SettingSailScript : MonoBehaviour
             goto GenerateAgain;
 
         // Success!
+        _moduleActivated = true;
         for (int i = 0; i < 4; i++)
             DisplayBoatSprites[i].sprite = BoatSprites[chosenDisplayBoats[i]];
         Debug.LogFormat("[Setting Sail #{0}] Displayed boats: {1}", _moduleId, chosenDisplayBoats.Select(i => boats[i]).Join(", "));
@@ -155,7 +162,7 @@ public class SettingSailScript : MonoBehaviour
         {
             Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, Buttonage[i].transform);
             Buttonage[i].AddInteractionPunch(0.5f);
-            if (_moduleSolved)
+            if (_moduleSolved || !_moduleActivated)
                 return false;
             if (i == correctBoat)
             {
@@ -333,6 +340,8 @@ public class SettingSailScript : MonoBehaviour
 
     IEnumerator TwitchHandleForcedSolve()
     {
+        while (!_moduleActivated)
+            yield return true;
         Buttonage[correctBoat].OnInteract();
         yield return new WaitForSeconds(0.1f);
     }
