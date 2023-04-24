@@ -15,8 +15,7 @@ MonoBehaviour:
   title: Setting Sail
   author: Crazycaleb
   description: "The entropy generated from them pointlessly speaking the word \u2018junk\u2019
-    will be on\r your head and your head alone.\n\nManual coming soon TM\n\nTemporary
-    manual can be found here: https://drive.google.com/drive/folders/1W2ByS8YpHFHfyHDBV6BMK5FaMSe83Oe5"
-  version: 1.1
+    will be on\r your head and your head alone.\n\nManual can be found here: https://ktane.timwi.de/HTML/Setting%20Sail.html"
+  version: 1.2
   outputFolder: build
   previewImage: {fileID: 2800000, guid: 13be65bdf6a854b49a880aa7a831f1a8, type: 3}
